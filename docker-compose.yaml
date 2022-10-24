@@ -1,0 +1,91 @@
+version: '3'
+
+services:
+
+  user-registration:
+    build:
+      context: ./user-registration
+      dockerfile: ./user-registration.dockerfile
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=combo-users sslmode=disable"
+
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: ./user-service.dockerfile
+    restart: always
+    ports:
+      - "8081:81"
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=users sslmode=disable"
+
+
+  address-service:
+    build:
+      context: ./address-service
+      dockerfile: ./address-service.dockerfile
+    restart: always
+    ports:
+      - "8082:82"
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=addresses sslmode=disable"
+
+
+  user-address-agg:
+    build:
+      context: ./user-address-agg
+      dockerfile: ./user-address-agg.dockerfile
+    restart: always
+    ports:
+      - "8084:84"
+    depends_on:
+      - mongo
+
+  emqx:
+    image: 'emqx'
+    ports:
+      - "1883:1883"
+      - "18083:18083"
+      - "8083:8083"
+    restart: always
+    volumes:
+      - ./broker-data:/data
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    volumes:
+      - ./docker-files/postgres-data:/var/lib/postgresql/data
+      - ./docker-files/.postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: 'mongo:4.2.16-bionic'
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: quickstart
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password123456789
+    volumes:
+      - ./db-data/mongo/:/data/db
+
+
+
+
+
+
+
+
+
+

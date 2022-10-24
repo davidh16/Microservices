@@ -1,0 +1,23 @@
+syntax = "proto3";
+package proto;
+option go_package = "/proto";
+
+message RegistrationRequest{
+    string name = 1;
+    string surname = 2;
+    string address = 3;
+    string email = 4;
+    string password = 5;
+}
+
+message RegistrationResponse{
+    int64 id = 1;
+    string name = 2;
+    string surname = 3;
+    int64 address_id = 4;
+    string address = 5;
+}
+
+service UserRegistration{
+    rpc RegisterUser(RegistrationRequest) returns (RegistrationResponse);
+}
